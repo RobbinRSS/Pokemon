@@ -1,27 +1,26 @@
 ﻿using System.Xml.Linq;
 
-namespace pokemon
+namespace pokemonGame
 {
 
-    class Charmander
+    abstract class Pokemon
     {
         public string name;
         public string battlecry;
+        public string type;
+        public string weakness;
 
-        public Charmander(string name, string battlecry)
+        public Pokemon(string name, string battlecry, string type, string weakness)
         {
             this.name = name;
             this.battlecry = battlecry;
+            this.type = type;
+            this.weakness = weakness;
         }
 
-        public void BattleCry()
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                Console.WriteLine($"{name}: {battlecry}");
-            }
-        }
-
+        // Elke pokemon maakt een geluid, maar niet allemaal hetzelfde geluid, daarom word er abstract gebruikt
+        public abstract void BattleCry();
+        
         public void SetName()
         {
             Console.Write("Geef je charmander een naam ");
@@ -31,26 +30,67 @@ namespace pokemon
         }
     }
 
+    class Charmander : Pokemon
+    {
+        // base gebruikt de constructor van pokemon
+        public Charmander(string name) : base(name, "Char! Char!", "Fire", "Water")
+        {
+        }
+
+        // hier word de BattleCry override, omdat een pokemon een geluid maakt
+        public override void BattleCry()
+        {
+            Console.WriteLine($"{name}: {battlecry}");
+        }
+    }
+
+    class Squirtle : Pokemon
+    {
+        // base gebruikt de constructor van pokemon
+        public Squirtle(string name) : base(name, "Squi Squi!", "Water", "Grass")
+        {
+        }
+        public override void BattleCry()
+        {
+            Console.WriteLine($"{name}: {battlecry}");
+        }
+    }
+
+    class Bulbasaur : Pokemon
+    {
+        // base gebruikt de constructor van pokemon
+        public Bulbasaur(string name) : base(name, "Bulb Bulb", "Grass", "Fire")
+        {
+        }
+
+        public override void BattleCry()
+        {
+            Console.WriteLine($"{name}: {battlecry}");
+        }
+    }
+
+
     class Pokeball
     {
-        public Charmander charmander;
+        public Pokemon pokemon;
         public bool isOpen;
 
-        public Pokeball(Charmander charmander)
+        public Pokeball(Pokemon pokemon)
         {
-            this.charmander = charmander;
+            this.pokemon = pokemon;
             isOpen = false;
         }
 
         public void Throw()
         {
             if (isOpen){
-                Console.WriteLine($"{charmander.name} was already outside his ball");
+                Console.WriteLine($"{pokemon.name} was already outside his ball");
             }
             else
             {
                 isOpen = true;
-                Console.WriteLine($"{charmander.name} is thrown");
+                Console.WriteLine($"{pokemon.name} is thrown");
+                pokemon.BattleCry();
             }
         }
 
@@ -59,10 +99,11 @@ namespace pokemon
             if (isOpen)
             {
                 isOpen = false;
-                Console.WriteLine($"{charmander.name} returned to his ball");
+                pokemon.BattleCry();
+                Console.WriteLine($"{pokemon.name} returned to his ball");
             } else
             {
-                Console.WriteLine($"{charmander.name} was already in his ball");
+                Console.WriteLine($"{pokemon.name} was already in his ball");
             }
         }
 
@@ -76,9 +117,12 @@ namespace pokemon
         public Trainer(string name)
         {
             this.name = name;
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 2; i++)
             {
-                belt.Add(new Pokeball(new Charmander($"Charmander {i + 1}", "Char Char")));
+                belt.Add(new Pokeball(new Charmander($"Charmander {i + 1}")));
+                belt.Add(new Pokeball(new Squirtle($"Squirtle {i + 1}")));
+                belt.Add(new Pokeball(new Bulbasaur($"Bulbasaur {i + 1}")));
+
             }
         }
 
