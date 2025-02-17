@@ -107,6 +107,11 @@ namespace pokemonGame
             }
         }
 
+        public Pokemon GetPokemon()
+        {
+            return this.pokemon;
+        }
+
     }
 
     class Trainer
@@ -146,6 +151,40 @@ namespace pokemonGame
 
     }
 
+    class Battle
+    {
+        public Trainer trainer1;
+        public Trainer trainer2;
+        Random rnd = new Random();
+
+        public Battle(Trainer trainer1, Trainer trainer2)
+        {
+            this.trainer1 = trainer1;
+            this.trainer2 = trainer2;
+
+        }
+
+        public void PokemonBattle()
+        {
+
+            // get a random pokemon from trainer 1
+            int index1 = rnd.Next(0, trainer1.belt.Count);
+            Pokemon pokemonTrainer1 = trainer1.belt[index1].GetPokemon();
+            // get a random pokemon from trainer 2
+            int index2 = rnd.Next(0, trainer2.belt.Count);
+            Pokemon pokemonTrainer2 = trainer2.belt[index2].GetPokemon();
+
+            // each player throws the pokemon with the random number
+
+
+
+            // create the logic for the rock-paper-scissor style
+            // if its a draw each pokemon returns to their pokeball
+            // if a pokemon dies, remove him from the list, the winning pokemon stays
+
+        }
+    }
+
     class Program
     {
 
@@ -159,6 +198,10 @@ namespace pokemonGame
             string trainer2Name = Console.ReadLine();
             Trainer trainer2 = new Trainer(trainer2Name);
 
+            Battle test1 = new Battle(trainer1, trainer2);
+
+            test1.PokemonBattle();
+
             for(int i = 0;i < 6; i++)
             {
                 trainer1.ThrowPokeball(i);
@@ -166,7 +209,7 @@ namespace pokemonGame
                 trainer1.ReturnPokeball(i);
                 trainer2.ReturnPokeball(i);
             }
-
+           
 
         }
     }
