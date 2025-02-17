@@ -175,10 +175,24 @@ namespace pokemonGame
             Pokemon pokemonTrainer2 = trainer2.belt[index2].GetPokemon();
 
             // each player throws the pokemon with the random number
-
-
+            trainer1.ThrowPokeball(index1);
+            trainer2.ThrowPokeball(index2);
 
             // create the logic for the rock-paper-scissor style
+            if (pokemonTrainer1.type == "Fire" && pokemonTrainer2.type == "Grass" ||
+                pokemonTrainer1.type == "Water" && pokemonTrainer2.type == "Fire" ||
+                pokemonTrainer1.type == "Grass" && pokemonTrainer2.type == "Water")
+                Console.WriteLine("trainer 1 wins");
+            else if (pokemonTrainer2.type == "Fire" && pokemonTrainer1.type == "Grass" ||
+                pokemonTrainer2.type == "Water" && pokemonTrainer1.type == "Fire" ||
+                pokemonTrainer2.type == "Grass" && pokemonTrainer1.type == "Water")
+                Console.WriteLine("trainer 2 wins");
+            else Console.WriteLine("Its a draw");
+
+
+            Console.ReadKey();
+
+
             // if its a draw each pokemon returns to their pokeball
             // if a pokemon dies, remove him from the list, the winning pokemon stays
 
