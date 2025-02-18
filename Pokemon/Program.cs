@@ -161,43 +161,57 @@ namespace pokemonGame
         {
             this.trainer1 = trainer1;
             this.trainer2 = trainer2;
-
         }
 
         public void PokemonBattle()
         {
+            while (trainer1.belt.Count > 0 && trainer2.belt.Count > 0)
+            {
+                int index1 = rnd.Next(0, trainer1.belt.Count);
+                Pokemon pokemonTrainer1 = trainer1.belt[index1].GetPokemon();
 
-            // get a random pokemon from trainer 1
-            int index1 = rnd.Next(0, trainer1.belt.Count);
-            Pokemon pokemonTrainer1 = trainer1.belt[index1].GetPokemon();
-            // get a random pokemon from trainer 2
-            int index2 = rnd.Next(0, trainer2.belt.Count);
-            Pokemon pokemonTrainer2 = trainer2.belt[index2].GetPokemon();
+                int index2 = rnd.Next(0, trainer2.belt.Count);
+                Pokemon pokemonTrainer2 = trainer2.belt[index2].GetPokemon();
 
-            // each player throws the pokemon with the random number
-            trainer1.ThrowPokeball(index1);
-            trainer2.ThrowPokeball(index2);
+                trainer1.ThrowPokeball(index1);
+                trainer2.ThrowPokeball(index2);
 
-            // create the logic for the rock-paper-scissor style
-            if (pokemonTrainer1.type == "Fire" && pokemonTrainer2.type == "Grass" ||
-                pokemonTrainer1.type == "Water" && pokemonTrainer2.type == "Fire" ||
-                pokemonTrainer1.type == "Grass" && pokemonTrainer2.type == "Water")
-                Console.WriteLine("trainer 1 wins");
-            else if (pokemonTrainer2.type == "Fire" && pokemonTrainer1.type == "Grass" ||
-                pokemonTrainer2.type == "Water" && pokemonTrainer1.type == "Fire" ||
-                pokemonTrainer2.type == "Grass" && pokemonTrainer1.type == "Water")
-                Console.WriteLine("trainer 2 wins");
-            else Console.WriteLine("Its a draw");
+                if (pokemonTrainer1.type == "Fire" && pokemonTrainer2.type == "Grass" ||
+                    pokemonTrainer1.type == "Water" && pokemonTrainer2.type == "Fire" ||
+                    pokemonTrainer1.type == "Grass" && pokemonTrainer2.type == "Water")
+                {
+                    Console.WriteLine($"{trainer1.name} wins this round!");
+                    trainer2.ReturnPokeball(index2);
+                    trainer2.belt.RemoveAt(index2);
+                }
+                else if (pokemonTrainer2.type == "Fire" && pokemonTrainer1.type == "Grass" ||
+                         pokemonTrainer2.type == "Water" && pokemonTrainer1.type == "Fire" ||
+                         pokemonTrainer2.type == "Grass" && pokemonTrainer1.type == "Water")
+                {
+                    Console.WriteLine($"{trainer2.name} wins this round!");
+                    trainer1.ReturnPokeball(index1);
+                    trainer1.belt.RemoveAt(index1);
+                }
+                else
+                {
+                    Console.WriteLine("It's a draw! Both Pokémon are removed!");
+                    trainer1.ReturnPokeball(index1);
+                    trainer2.ReturnPokeball(index2);
+                    trainer1.belt.RemoveAt(index1);
+                    trainer2.belt.RemoveAt(index2);
+                }
+            }
 
-
+            if (trainer1.belt.Count == 0 && trainer2.belt.Count == 0)
+                Console.WriteLine("It's a tie! Both trainers ran out of Pokémon.");
+            else if (trainer1.belt.Count == 0)
+                Console.WriteLine($"{trainer2.name} wins the battle!");
+            else
+                Console.WriteLine($"{trainer1.name} wins the battle!");
             Console.ReadKey();
-
-
-            // if its a draw each pokemon returns to their pokeball
-            // if a pokemon dies, remove him from the list, the winning pokemon stays
-
         }
     }
+
 
     class Program
     {
@@ -215,14 +229,6 @@ namespace pokemonGame
             Battle test1 = new Battle(trainer1, trainer2);
 
             test1.PokemonBattle();
-
-            for(int i = 0;i < 6; i++)
-            {
-                trainer1.ThrowPokeball(i);
-                trainer2.ThrowPokeball(i);
-                trainer1.ReturnPokeball(i);
-                trainer2.ReturnPokeball(i);
-            }
            
 
         }
