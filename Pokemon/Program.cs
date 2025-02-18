@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 namespace pokemonGame
 {
@@ -165,6 +166,7 @@ namespace pokemonGame
 
         public void PokemonBattle()
         {
+            Arena.GetRounds();
             while (trainer1.belt.Count > 0 && trainer2.belt.Count > 0)
             {
                 int index1 = rnd.Next(0, trainer1.belt.Count);
@@ -183,6 +185,7 @@ namespace pokemonGame
                     Console.WriteLine($"{trainer1.name} wins this round!");
                     trainer2.ReturnPokeball(index2);
                     trainer2.belt.RemoveAt(index2);
+                    Arena.GetBattles();
                 }
                 else if (pokemonTrainer2.type == "Fire" && pokemonTrainer1.type == "Grass" ||
                          pokemonTrainer2.type == "Water" && pokemonTrainer1.type == "Fire" ||
@@ -191,6 +194,7 @@ namespace pokemonGame
                     Console.WriteLine($"{trainer2.name} wins this round!");
                     trainer1.ReturnPokeball(index1);
                     trainer1.belt.RemoveAt(index1);
+                    Arena.GetBattles();
                 }
                 else
                 {
@@ -199,7 +203,9 @@ namespace pokemonGame
                     trainer2.ReturnPokeball(index2);
                     trainer1.belt.RemoveAt(index1);
                     trainer2.belt.RemoveAt(index2);
+                    Arena.GetBattles();
                 }
+                Arena.GetRounds();
             }
 
             if (trainer1.belt.Count == 0 && trainer2.belt.Count == 0)
@@ -209,6 +215,30 @@ namespace pokemonGame
             else
                 Console.WriteLine($"{trainer1.name} wins the battle!");
             Console.ReadKey();
+        }
+    }
+
+    class Arena
+    {
+        static int rounds;
+        static int battles;
+        static Arena()
+        {
+            rounds = 0;
+            battles = 0;
+        }
+
+        public static void GetRounds()
+        {
+            rounds = rounds + 1;
+            Console.WriteLine($"Current round {rounds}");
+        }
+
+        public static void GetBattles()
+        {
+            battles = battles + 1;
+            Console.WriteLine($"Amount of battles fought {battles}");
+
         }
     }
 
@@ -226,9 +256,9 @@ namespace pokemonGame
             string trainer2Name = Console.ReadLine();
             Trainer trainer2 = new Trainer(trainer2Name);
 
-            Battle test1 = new Battle(trainer1, trainer2);
+            Battle currentBattle = new Battle(trainer1, trainer2);
 
-            test1.PokemonBattle();
+            currentBattle.PokemonBattle();
            
 
         }
