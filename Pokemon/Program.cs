@@ -1,17 +1,25 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text;
 using System.Xml.Linq;
 
 namespace pokemonGame
 {
 
+    enum PokemonType
+    {
+        fire,
+        water,
+        grass
+    }
     abstract class Pokemon
     {
-        public string name;
-        public string battlecry;
-        public string type;
-        public string weakness;
+        public readonly string name;
+        public readonly string battlecry;
 
-        public Pokemon(string name, string battlecry, string type, string weakness)
+        public readonly PokemonType type; // make this an enum LATER
+        public readonly PokemonType weakness; // make this an enum LATER
+
+        public Pokemon(string name, string battlecry, PokemonType type, PokemonType weakness)
         {
             this.name = name;
             this.battlecry = battlecry;
@@ -22,19 +30,12 @@ namespace pokemonGame
         // Elke pokemon maakt een geluid, maar niet allemaal hetzelfde geluid, daarom word er abstract gebruikt
         public abstract void BattleCry();
         
-        public void SetName()
-        {
-            Console.Write("Geef je charmander een naam ");
-            string name = Console.ReadLine();
-            this.name = name;
-            Console.WriteLine($"Je Charmander heet nu {this.name}!");
-        }
     }
 
     class Charmander : Pokemon
     {
         // base gebruikt de constructor van pokemon
-        public Charmander(string name) : base(name, "Char! Char!", "Fire", "Water")
+        public Charmander(string name) : base(name, "Char! Char!", PokemonType.fire, PokemonType.water)
         {
         }
 
@@ -48,7 +49,7 @@ namespace pokemonGame
     class Squirtle : Pokemon
     {
         // base gebruikt de constructor van pokemon
-        public Squirtle(string name) : base(name, "Squi Squi!", "Water", "Grass")
+        public Squirtle(string name) : base(name, "Squi Squi!", PokemonType.water, PokemonType.grass)
         {
         }
         public override void BattleCry()
@@ -60,7 +61,7 @@ namespace pokemonGame
     class Bulbasaur : Pokemon
     {
         // base gebruikt de constructor van pokemon
-        public Bulbasaur(string name) : base(name, "Bulb Bulb", "Grass", "Fire")
+        public Bulbasaur(string name) : base(name, "Bulb Bulb", PokemonType.grass, PokemonType.fire)
         {
         }
 
@@ -71,41 +72,29 @@ namespace pokemonGame
     }
 
 
-    class Pokeball
+    sealed class Pokeball
     {
-        public Pokemon pokemon;
-        public bool isOpen;
+        public readonly Pokemon pokemon;
 
         public Pokeball(Pokemon pokemon)
         {
             this.pokemon = pokemon;
-            isOpen = false;
         }
 
         public void Throw()
         {
-            if (isOpen){
-                Console.WriteLine($"{pokemon.name} was already outside his ball");
-            }
-            else
-            {
-                isOpen = true;
+                Console.ForegroundColor = ConsoleColor.Blue;
                 Console.WriteLine($"{pokemon.name} is thrown");
                 pokemon.BattleCry();
-            }
+                Console.ResetColor();
         }
 
         public void Return()
         {
-            if (isOpen)
-            {
-                isOpen = false;
+                Console.ForegroundColor = ConsoleColor.Red;
                 pokemon.BattleCry();
                 Console.WriteLine($"{pokemon.name} returned to his ball");
-            } else
-            {
-                Console.WriteLine($"{pokemon.name} was already in his ball");
-            }
+                Console.ResetColor();
         }
 
         public Pokemon GetPokemon()
@@ -118,7 +107,7 @@ namespace pokemonGame
     class Trainer
     {
         public string name;
-        public List<Pokeball> belt = new List<Pokeball>();
+        public readonly List<Pokeball> belt = new List<Pokeball>();
 
         public Trainer(string name)
         {
@@ -178,27 +167,35 @@ namespace pokemonGame
                 trainer1.ThrowPokeball(index1);
                 trainer2.ThrowPokeball(index2);
 
-                if (pokemonTrainer1.type == "Fire" && pokemonTrainer2.type == "Grass" ||
-                    pokemonTrainer1.type == "Water" && pokemonTrainer2.type == "Fire" ||
-                    pokemonTrainer1.type == "Grass" && pokemonTrainer2.type == "Water")
+                if (pokemonTrainer1.type == PokemonType.fire && pokemonTrainer2.type == PokemonType.grass ||
+                    pokemonTrainer1.type == PokemonType.water && pokemonTrainer2.type == PokemonType.fire ||
+                    pokemonTrainer1.type == PokemonType.grass && pokemonTrainer2.type == PokemonType.water)
                 {
+                    Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"{trainer1.name} wins this round!");
+                    Console.ResetColor();
+
                     trainer2.ReturnPokeball(index2);
                     trainer2.belt.RemoveAt(index2);
                     Arena.GetBattles();
                 }
-                else if (pokemonTrainer2.type == "Fire" && pokemonTrainer1.type == "Grass" ||
-                         pokemonTrainer2.type == "Water" && pokemonTrainer1.type == "Fire" ||
-                         pokemonTrainer2.type == "Grass" && pokemonTrainer1.type == "Water")
+                else if (pokemonTrainer2.type == PokemonType.fire && pokemonTrainer1.type == PokemonType.grass ||
+                         pokemonTrainer2.type == PokemonType.water && pokemonTrainer1.type == PokemonType.fire ||
+                         pokemonTrainer2.type == PokemonType.grass && pokemonTrainer1.type == PokemonType.water)
                 {
+                    Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"{trainer2.name} wins this round!");
+                    Console.ResetColor();
+
                     trainer1.ReturnPokeball(index1);
                     trainer1.belt.RemoveAt(index1);
                     Arena.GetBattles();
                 }
                 else
                 {
-                    Console.WriteLine("It's a draw! Both Pokémon are removed!");
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("It's a draw!");
+                    Console.ResetColor();
                     trainer1.ReturnPokeball(index1);
                     trainer2.ReturnPokeball(index2);
                     trainer1.belt.RemoveAt(index1);
