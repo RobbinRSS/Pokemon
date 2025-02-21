@@ -13,13 +13,13 @@ namespace pokemonGame
     }
     abstract class Pokemon
     {
-        public readonly string name;
-        public readonly string battlecry;
+        public string name { get; }
+        public string battlecry { get; }
 
-        public readonly PokemonType type; // make this an enum LATER
-        public readonly PokemonType weakness; // make this an enum LATER
+        public PokemonType type { get; }
+        public PokemonType weakness { get; }
 
-        public Pokemon(string name, string battlecry, PokemonType type, PokemonType weakness)
+        protected Pokemon(string name, string battlecry, PokemonType type, PokemonType weakness)
         {
             this.name = name;
             this.battlecry = battlecry;
@@ -48,7 +48,6 @@ namespace pokemonGame
 
     class Squirtle : Pokemon
     {
-        // base gebruikt de constructor van pokemon
         public Squirtle(string name) : base(name, "Squi Squi!", PokemonType.water, PokemonType.grass)
         {
         }
@@ -60,7 +59,6 @@ namespace pokemonGame
 
     class Bulbasaur : Pokemon
     {
-        // base gebruikt de constructor van pokemon
         public Bulbasaur(string name) : base(name, "Bulb Bulb", PokemonType.grass, PokemonType.fire)
         {
         }
@@ -74,7 +72,7 @@ namespace pokemonGame
 
     sealed class Pokeball
     {
-        public readonly Pokemon pokemon;
+        public Pokemon pokemon { get; }
 
         public Pokeball(Pokemon pokemon)
         {
@@ -106,13 +104,14 @@ namespace pokemonGame
 
     class Trainer
     {
-        public string name;
-        public readonly List<Pokeball> belt = new List<Pokeball>();
+        public const int PokeballsPerType = 2;
+        public string name { get; }
+        public List<Pokeball> belt { get; } = new List<Pokeball>();
 
         public Trainer(string name)
         {
             this.name = name;
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < PokeballsPerType; i++)
             {
                 belt.Add(new Pokeball(new Charmander($"Charmander {i + 1}")));
                 belt.Add(new Pokeball(new Squirtle($"Squirtle {i + 1}")));
@@ -146,6 +145,7 @@ namespace pokemonGame
         public Trainer trainer1;
         public Trainer trainer2;
         Random rnd = new Random();
+        private int? previousWinnerIndex = null; // Tracks last round's winner
 
         public Battle(Trainer trainer1, Trainer trainer2)
         {
@@ -156,12 +156,23 @@ namespace pokemonGame
         public void PokemonBattle()
         {
             Arena.GetRounds();
+
             while (trainer1.belt.Count > 0 && trainer2.belt.Count > 0)
             {
-                int index1 = rnd.Next(0, trainer1.belt.Count);
-                Pokemon pokemonTrainer1 = trainer1.belt[index1].GetPokemon();
+                int index1, index2;
 
-                int index2 = rnd.Next(0, trainer2.belt.Count);
+                if (previousWinnerIndex == null)
+                {
+                    index1 = rnd.Next(0, trainer1.belt.Count);
+                    index2 = rnd.Next(0, trainer2.belt.Count);
+                }
+                else
+                {
+                    index1 = previousWinnerIndex.Value; // Previous winner stays in arena
+                    index2 = rnd.Next(0, trainer2.belt.Count);
+                }
+
+                Pokemon pokemonTrainer1 = trainer1.belt[index1].GetPokemon();
                 Pokemon pokemonTrainer2 = trainer2.belt[index2].GetPokemon();
 
                 trainer1.ThrowPokeball(index1);
@@ -169,7 +180,7 @@ namespace pokemonGame
 
                 if (pokemonTrainer1.type == PokemonType.fire && pokemonTrainer2.type == PokemonType.grass ||
                     pokemonTrainer1.type == PokemonType.water && pokemonTrainer2.type == PokemonType.fire ||
-                    pokemonTrainer1.type == PokemonType.grass && pokemonTrainer2.type == PokemonType.water)
+                    pokemonTrainer1.type == PokemonType.grass && pokemonTrainer2.type == PokemonType.water) // Trainer 1 wins
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"{trainer1.name} wins this round!");
@@ -177,11 +188,31 @@ namespace pokemonGame
 
                     trainer2.ReturnPokeball(index2);
                     trainer2.belt.RemoveAt(index2);
+                    previousWinnerIndex = index1; // Trainer 1's Pokémon stays
                     Arena.GetBattles();
                 }
-                else if (pokemonTrainer2.type == PokemonType.fire && pokemonTrainer1.type == PokemonType.grass ||
-                         pokemonTrainer2.type == PokemonType.water && pokemonTrainer1.type == PokemonType.fire ||
-                         pokemonTrainer2.type == PokemonType.grass && pokemonTrainer1.type == PokemonType.water)
+                else if (pokemonTrainer2.type == pokemonTrainer1.type) // DRAW
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("It's a draw!");
+                    Console.ResetColor();
+
+                    if (previousWinnerIndex != null)
+                    {
+                        trainer1.ReturnPokeball(previousWinnerIndex.Value); // Previous winner goes back
+                    }
+                    else
+                    {
+                        trainer1.ReturnPokeball(index1);
+                        trainer2.ReturnPokeball(index2);
+                        trainer1.belt.RemoveAt(index1);
+                        trainer2.belt.RemoveAt(index2);
+                    }
+
+                    previousWinnerIndex = null;
+                    Arena.GetBattles();
+                }
+                else // Trainer 2 wins
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"{trainer2.name} wins this round!");
@@ -189,19 +220,10 @@ namespace pokemonGame
 
                     trainer1.ReturnPokeball(index1);
                     trainer1.belt.RemoveAt(index1);
+                    previousWinnerIndex = index2; // Trainer 2's Pokémon stays
                     Arena.GetBattles();
                 }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("It's a draw!");
-                    Console.ResetColor();
-                    trainer1.ReturnPokeball(index1);
-                    trainer2.ReturnPokeball(index2);
-                    trainer1.belt.RemoveAt(index1);
-                    trainer2.belt.RemoveAt(index2);
-                    Arena.GetBattles();
-                }
+
                 Arena.GetRounds();
             }
 
@@ -211,14 +233,15 @@ namespace pokemonGame
                 Console.WriteLine($"{trainer2.name} wins the battle!");
             else
                 Console.WriteLine($"{trainer1.name} wins the battle!");
+
             Console.ReadKey();
         }
     }
 
     class Arena
     {
-        static int rounds;
-        static int battles;
+        static int rounds { get; set; }
+        static int battles { get; set; }
         static Arena()
         {
             rounds = 0;
