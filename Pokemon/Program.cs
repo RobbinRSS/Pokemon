@@ -145,7 +145,6 @@ namespace pokemonGame
         public Trainer trainer1;
         public Trainer trainer2;
         Random rnd = new Random();
-        private int? previousWinnerIndex = null; // Tracks last round's winner
 
         public Battle(Trainer trainer1, Trainer trainer2)
         {
@@ -156,23 +155,12 @@ namespace pokemonGame
         public void PokemonBattle()
         {
             Arena.GetRounds();
-
             while (trainer1.belt.Count > 0 && trainer2.belt.Count > 0)
             {
-                int index1, index2;
-
-                if (previousWinnerIndex == null)
-                {
-                    index1 = rnd.Next(0, trainer1.belt.Count);
-                    index2 = rnd.Next(0, trainer2.belt.Count);
-                }
-                else
-                {
-                    index1 = previousWinnerIndex.Value; // Previous winner stays in arena
-                    index2 = rnd.Next(0, trainer2.belt.Count);
-                }
-
+                int index1 = rnd.Next(0, trainer1.belt.Count);
                 Pokemon pokemonTrainer1 = trainer1.belt[index1].GetPokemon();
+
+                int index2 = rnd.Next(0, trainer2.belt.Count);
                 Pokemon pokemonTrainer2 = trainer2.belt[index2].GetPokemon();
 
                 trainer1.ThrowPokeball(index1);
@@ -180,7 +168,7 @@ namespace pokemonGame
 
                 if (pokemonTrainer1.type == PokemonType.fire && pokemonTrainer2.type == PokemonType.grass ||
                     pokemonTrainer1.type == PokemonType.water && pokemonTrainer2.type == PokemonType.fire ||
-                    pokemonTrainer1.type == PokemonType.grass && pokemonTrainer2.type == PokemonType.water) // Trainer 1 wins
+                    pokemonTrainer1.type == PokemonType.grass && pokemonTrainer2.type == PokemonType.water) // If trainer 1 wins
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"{trainer1.name} wins this round!");
@@ -188,7 +176,6 @@ namespace pokemonGame
 
                     trainer2.ReturnPokeball(index2);
                     trainer2.belt.RemoveAt(index2);
-                    previousWinnerIndex = index1; // Trainer 1's Pokémon stays
                     Arena.GetBattles();
                 }
                 else if (pokemonTrainer2.type == pokemonTrainer1.type) // DRAW
@@ -196,23 +183,14 @@ namespace pokemonGame
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("It's a draw!");
                     Console.ResetColor();
-
-                    if (previousWinnerIndex != null)
-                    {
-                        trainer1.ReturnPokeball(previousWinnerIndex.Value); // Previous winner goes back
-                    }
-                    else
-                    {
-                        trainer1.ReturnPokeball(index1);
-                        trainer2.ReturnPokeball(index2);
-                        trainer1.belt.RemoveAt(index1);
-                        trainer2.belt.RemoveAt(index2);
-                    }
-
-                    previousWinnerIndex = null;
+                    trainer1.ReturnPokeball(index1);
+                    trainer2.ReturnPokeball(index2);
+                    trainer1.belt.RemoveAt(index1);
+                    trainer2.belt.RemoveAt(index2);
                     Arena.GetBattles();
+
                 }
-                else // Trainer 2 wins
+                else // If trainer 2 wins
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"{trainer2.name} wins this round!");
@@ -220,10 +198,8 @@ namespace pokemonGame
 
                     trainer1.ReturnPokeball(index1);
                     trainer1.belt.RemoveAt(index1);
-                    previousWinnerIndex = index2; // Trainer 2's Pokémon stays
                     Arena.GetBattles();
                 }
-
                 Arena.GetRounds();
             }
 
@@ -233,7 +209,6 @@ namespace pokemonGame
                 Console.WriteLine($"{trainer2.name} wins the battle!");
             else
                 Console.WriteLine($"{trainer1.name} wins the battle!");
-
             Console.ReadKey();
         }
     }
